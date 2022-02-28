@@ -1,3 +1,26 @@
+interface Coord {
+    x: number;
+    y: number;
+}
+interface Coords extends Array<Coord> {}
+interface Snake {
+    head: {
+        x: number;
+        y: number;
+        nextX: number;
+        nextY: number;
+    };
+    moving: string;
+    pause: boolean;
+    waitOnFrame: boolean;
+    gameOver: boolean;
+    length: number;
+    body: Coords;
+}
+interface Input {
+    moving: string;
+    waitOnFrame: boolean;
+}
 const xAxis = new Map([
     ["ArrowLeft", -1],
     ["ArrowRight", 1],
@@ -6,7 +29,12 @@ const yAxis = new Map([
     ["ArrowUp", -1],
     ["ArrowDown", 1],
 ]);
-const checkGameOver = (snake, newSnake, setSnake, hasWalls) => {
+const checkGameOver = (
+    snake: Snake,
+    newSnake: Snake,
+    setSnake: Function,
+    hasWalls: boolean
+): Function => {
     if (
         snake.body
             .slice(2)
@@ -24,7 +52,7 @@ const checkGameOver = (snake, newSnake, setSnake, hasWalls) => {
     }
     return setSnake(newSnake);
 };
-const moveBody = (body, head) => {
+const moveBody = (body: Coords, head: Coord): Coords => {
     let newbody = [...body];
     for (let i = body.length - 1; i > 0; i--) {
         newbody[i] = newbody[i - 1];
@@ -32,15 +60,25 @@ const moveBody = (body, head) => {
     newbody[0] = head;
     return newbody;
 };
-const getNext = next => {
+const getNext = (next: number): number => {
     if (next > 49) return 0;
     if (next < 0) return 49;
     return next;
 };
-const moveX = (key, snake, setSnake, input, setInput, hasWalls) => {
+const moveX = (
+    key: string,
+    snake: Snake,
+    setSnake: Function,
+    input: Input,
+    setInput: Function,
+    hasWalls?: boolean
+): Function => {
     let change = xAxis.get(key);
     setInput({ ...input, waitOnFrame: false });
-    let newbody = moveBody(snake.body, { x: snake.head.x, y: snake.head.y });
+    let newbody = moveBody([...snake.body], {
+        x: snake.head.x,
+        y: snake.head.y,
+    });
     let newSnake = {
         ...snake,
         body: newbody,
@@ -55,7 +93,14 @@ const moveX = (key, snake, setSnake, input, setInput, hasWalls) => {
     };
     return checkGameOver(snake, newSnake, setSnake, hasWalls);
 };
-const moveY = (key, snake, setSnake, input, setInput, hasWalls) => {
+const moveY = (
+    key: string,
+    snake: Snake,
+    setSnake: Function,
+    input: Input,
+    setInput: Function,
+    hasWalls?: boolean
+): Function => {
     let change = yAxis.get(key);
     setInput({ ...input, waitOnFrame: false });
     let newbody = moveBody(snake.body, { x: snake.head.x, y: snake.head.y });
@@ -73,11 +118,16 @@ const moveY = (key, snake, setSnake, input, setInput, hasWalls) => {
 
     return checkGameOver(snake, newSnake, setSnake, hasWalls);
 };
-const pause = (snake, setSnake) => {
+const pause = (snake: Snake, setSnake: Function): Function => {
     if (snake.gameOver) return setSnake(DEFAULT_SNAKE);
     setSnake({ ...snake, pause: !snake.pause });
 };
-const getValidAction = (key, snake, input, setInput) => {
+const getValidAction = (
+    key: string,
+    snake: Snake,
+    input: Input,
+    setInput: Function
+): Function => {
     if (xAxis.has(key) && !xAxis.has(snake.moving) && !input.waitOnFrame) {
         return setInput({ moving: key, waitOnFrame: true });
     }
@@ -87,7 +137,13 @@ const getValidAction = (key, snake, input, setInput) => {
     }
 };
 
-export const newFrame = (snake, setSnake, input, setInput, hasWalls) => {
+export const newFrame = (
+    snake: Snake,
+    setSnake: Function,
+    input: Input,
+    setInput: Function,
+    hasWalls?: boolean
+): Function => {
     const { moving } = input;
     if (xAxis.has(moving)) {
         return moveX(moving, snake, setSnake, input, setInput, hasWalls);
@@ -97,7 +153,7 @@ export const newFrame = (snake, setSnake, input, setInput, hasWalls) => {
         return moveY(moving, snake, setSnake, input, setInput, hasWalls);
     }
 };
-export const snakeSnacks = (snake, setSnake) => {
+export const snakeSnacks = (snake: Snake, setSnake: Function): Function => {
     let newbody = [...snake.body];
     newbody.push(newbody[newbody.length - 1]);
     let newSnake = {
@@ -106,7 +162,7 @@ export const snakeSnacks = (snake, setSnake) => {
     };
     return setSnake(newSnake);
 };
-export const newFood = snake => {
+export const newFood = (snake: Snake): Coord => {
     let food = {
         x: Math.floor(Math.random() * 50),
         y: Math.floor(Math.random() * 50),
@@ -161,7 +217,13 @@ export const DEFAULT_GRID = [...Array(50)].map((_, i) => {
     });
     return inner;
 });
-export const getPlayerInput = (key, snake, input, setInput, setSnake) => {
+export const getPlayerInput = (
+    key: string,
+    snake: Snake,
+    input: Input,
+    setInput: Function,
+    setSnake: Function
+): Function => {
     if (key == " ") return pause(snake, setSnake);
     return getValidAction(key, snake, input, setInput);
 };
