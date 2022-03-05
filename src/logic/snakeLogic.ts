@@ -29,6 +29,12 @@ const yAxis = new Map([
     ["ArrowUp", -1],
     ["ArrowDown", 1],
 ]);
+const MODES = new Map([
+    ["easy", 150],
+    ["medium", 100],
+    ["hard", 50],
+    ["god", 10],
+]);
 const checkGameOver = (
     snake: Snake,
     newSnake: Snake,
@@ -38,7 +44,7 @@ const checkGameOver = (
     if (
         snake.body
             .slice(2)
-            .filter(part => part.x == snake.head.x && part.y == snake.head.y)
+            .filter(part => part.x === snake.head.x && part.y === snake.head.y)
             .length >= 1
     ) {
         return setSnake({ ...newSnake, gameOver: true });
@@ -168,18 +174,22 @@ export const newFood = (snake: Snake): Coord => {
         y: Math.floor(Math.random() * 50),
     };
     while (
-        snake.body.filter(part => part.x == food.x && part.y == food.y)
+        snake.body.filter(part => part.x === food.x && part.y === food.y)
             .length >= 1
     ) {
         food = {
-            x: Math.floor(Math.random() * 51),
-            y: Math.floor(Math.random() * 51),
+            x: Math.floor(Math.random() * 50),
+            y: Math.floor(Math.random() * 50),
         };
     }
     return food;
 };
+export const handleMode = (mode: string, setSpeed: Function) => {
+    setSpeed(MODES.get(mode));
+};
 
-export const DEFAULT_SPEED = 100;
+export const DEFAULT_SPEED = MODES.get("medium");
+export const DEFAULT_MODE = "medium";
 export const DEFAULT_SNAKE = {
     head: {
         x: 25,
@@ -224,6 +234,6 @@ export const getPlayerInput = (
     setInput: Function,
     setSnake: Function
 ): Function => {
-    if (key == " ") return pause(snake, setSnake);
+    if (key === " ") return pause(snake, setSnake);
     return getValidAction(key, snake, input, setInput);
 };
